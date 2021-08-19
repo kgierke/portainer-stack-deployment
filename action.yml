@@ -1,0 +1,24 @@
+name: Portainer Stack Deploy
+description: Github Action for deploying docker swarm stacks through Portainer API.
+inputs:
+  portainer-url:
+    description: URL of the portainer API
+    required: true
+  portainer-username:
+    description: Username to authenticate against the API
+    required: true
+  portainer-password:
+    description: Password to authenticate against the API
+    required: true
+  portainer-endpoint:
+    description: Portainer Endpoint ID
+    required: true
+  name:
+    description: Name of the stack to be deployed or updated.
+    required: true
+  file:
+    description: Location of the stack file (Relative from the root directory)
+    required: true
+runs:
+  using: node12
+  main: index.js

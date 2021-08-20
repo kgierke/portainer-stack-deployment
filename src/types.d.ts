@@ -36,6 +36,11 @@ export interface UpdateStackPayload {
     file: string
 }
 
+export interface DeleteStackPayload {
+    id: number
+    endpoint: number
+}
+
 /**
  * Portainer specific interfaces
  */

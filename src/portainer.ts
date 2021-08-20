@@ -1,5 +1,5 @@
 import axios, {AxiosInstance, AxiosRequestConfig} from 'axios';
-import {CreateStackPayload, PortainerStack, Stack, UpdateStackPayload} from "./types";
+import {CreateStackPayload, DeleteStackPayload, PortainerStack, Stack, UpdateStackPayload} from "./types";
 
 export class PortainerClient {
     token = null;
@@ -132,11 +132,17 @@ export class PortainerClient {
     /**
      * Delete a stack by the given ID.
      *
-     * @param stackId {Number} - ID of the stack to be deleted.
+     * @param payload {DeleteStackPayload} - ID of the stack to be deleted.
      */
-    async deleteStack(stackId: number): Promise<void> {
+    async deleteStack(payload: DeleteStackPayload): Promise<void> {
         await this.client.delete(
-            `/stacks/${stackId}`
+            `/stacks/${payload.id}`,
+            {
+                params: {
+                    external: true,
+                    endpointId: payload.endpoint
+                }
+            }
         );
     }
 }

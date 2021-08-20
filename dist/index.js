@@ -4204,11 +4204,16 @@ class PortainerClient {
     /**
      * Delete a stack by the given ID.
      *
-     * @param stackId {Number} - ID of the stack to be deleted.
+     * @param payload {DeleteStackPayload} - ID of the stack to be deleted.
      */
-    deleteStack(stackId) {
+    deleteStack(payload) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.client.delete(`/stacks/${stackId}`);
+            yield this.client.delete(`/stacks/${payload.id}`, {
+                params: {
+                    external: true,
+                    endpointId: payload.endpoint
+                }
+            });
         });
     }
 }
@@ -4244,7 +4249,10 @@ function run() {
                 if (cfg.stack.delete) {
                     core.startGroup('Delete existing stack');
                     core.info(`Delete existing stack (ID: ${stack.id})...`);
-                    yield portainer.deleteStack(stack.id);
+                    yield portainer.deleteStack({
+                        id: stack.id,
+                        endpoint: cfg.portainer.endpoint
+                    });
                     core.info("Stack deleted.");
                     core.endGroup();
                 }

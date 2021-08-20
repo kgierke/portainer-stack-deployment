@@ -136,7 +136,13 @@ export class PortainerClient {
      */
     async deleteStack(payload: DeleteStackPayload): Promise<void> {
         await this.client.delete(
-            `/stacks/${payload.id}`
+            `/stacks/${payload.id}`,
+            {
+                params: {
+                    external: true,
+                    endpointId: payload.endpoint
+                }
+            }
         );
     }
 }

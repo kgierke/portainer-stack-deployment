@@ -3332,6 +3332,12 @@ class PortainerClient {
             return config;
         });
     }
+    /**
+     * Authenticate against the Portainer API and store the JWT.
+     *
+     * @param username {String} - username to authenticate with.
+     * @param password {String} - password to authenticate with.
+     */
     login(username, password) {
         return __awaiter(this, void 0, void 0, function* () {
             const { data } = yield this.client.post('/auth', {
@@ -3341,10 +3347,15 @@ class PortainerClient {
             this.token = data.jwt;
         });
     }
+    /**
+     * Retrieve the swarm ID from the Portainer Endpoint.
+     *
+     * @param endpoint {Number} - Portainer endpoint ID.
+     */
     getSwarmId(endpoint) {
         return __awaiter(this, void 0, void 0, function* () {
             const { data } = yield this.client.get(`/endpoints/${endpoint}/docker/swarm`);
-            return data.id;
+            return data.ID;
         });
     }
     getStacks(endpoint) {
@@ -3409,22 +3420,25 @@ function run() {
     return src_awaiter(this, void 0, void 0, function* () {
         try {
             const cfg = parse();
-            core.debug('Parsed Configuration');
+            core.debug(`Configuration parsed: ${cfg}`);
             core.startGroup('Authentication');
             const portainer = new PortainerClient(cfg.portainer.url);
             yield portainer.login(cfg.portainer.username, cfg.portainer.password);
+            core.info("Retrieved authentication token from Portainer");
             core.endGroup();
-            core.startGroup('Get State');
+            core.startGroup('Get current state');
             const stacks = yield portainer.getStacks(cfg.portainer.endpoint);
             let stack = stacks.find(item => item.name === cfg.stack.name);
             core.endGroup();
             if (stack) {
                 core.startGroup('Update existing stack');
+                core.info(`Updating existing stack (ID: ${stack.id})`);
                 yield portainer.updateStack({
                     id: stack.id,
                     endpoint: cfg.portainer.endpoint,
                     file: cfg.stack.file
                 });
+                core.info("Stack updated.");
                 core.endGroup();
             }
             else {
@@ -3434,11 +3448,12 @@ function run() {
                     name: cfg.stack.name,
                     file: cfg.stack.file
                 });
+                core.info("Stack created.");
                 core.endGroup();
             }
         }
         catch (e) {
-            core.setFailed(e.message);
+            core.setFailed(`Action failed with error: ${e}`);
         }
     });
 }

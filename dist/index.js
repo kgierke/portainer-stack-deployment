@@ -4058,6 +4058,7 @@ function parseStackConfig() {
     const filePath = core.getInput('file', { required: true });
     let file = external_fs_.readFileSync(filePath, 'utf-8');
     if (filePath.split('.').pop() === 'mustache') {
+        mustache_mustache.escape = JSON.stringify;
         file = mustache_mustache.render(file, JSON.parse(core.getInput('variables', { required: false })));
     }
     return {
@@ -4235,7 +4236,7 @@ function run() {
     return src_awaiter(this, void 0, void 0, function* () {
         try {
             const cfg = parse();
-            core.debug(`Configuration parsed: ${cfg}`);
+            core.debug(`Stack parsed: ${cfg.stack.file}`);
             core.startGroup('Authentication');
             const portainer = new PortainerClient(cfg.portainer.url);
             yield portainer.login(cfg.portainer.username, cfg.portainer.password);

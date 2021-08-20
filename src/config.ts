@@ -17,6 +17,7 @@ function parseStackConfig(): StackConfig {
     let file = fs.readFileSync(filePath, 'utf-8');
 
     if (filePath.split('.').pop() === 'mustache') {
+        mustache.escape = JSON.stringify;
         file = mustache.render(file, JSON.parse(core.getInput('variables', {required: false})));
     }
 

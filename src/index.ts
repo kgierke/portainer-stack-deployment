@@ -5,7 +5,7 @@ import {PortainerClient} from './portainer';
 async function run() {
     try {
         const cfg = config.parse();
-        core.debug(`Configuration parsed: ${cfg}`);
+        core.debug(`Stack parsed: ${cfg.stack.file}`);
 
         core.startGroup('Authentication');
         const portainer = new PortainerClient(cfg.portainer.url);

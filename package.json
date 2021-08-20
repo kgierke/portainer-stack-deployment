@@ -2,10 +2,9 @@
   "name": "portainer-stack-deploy",
   "version": "1.0.0",
   "description": "Github Action for deploying docker swarm stacks through Portainer API.",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "package": "ncc build --source-map --license licenses.txt"
+    "build": "ncc build src/index.ts --source-map --license licenses.txt"
   },
   "repository": {
     "type": "git",

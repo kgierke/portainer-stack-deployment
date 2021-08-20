@@ -1,240 +1,6 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 88:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parse = void 0;
-const core = __importStar(__nccwpck_require__(186));
-const fs = __importStar(__nccwpck_require__(747));
-const parsePortainerConfig = () => {
-    return {
-        url: new URL(core.getInput('portainer-url', { required: true })),
-        username: core.getInput('portainer-username', { required: true }),
-        password: core.getInput('portainer-password', { required: true }),
-        endpoint: parseInt(core.getInput('portainer-endpoint', { required: true }))
-    };
-};
-const parseStackConfig = () => {
-    const filePath = core.getInput('file', { required: true });
-    const file = fs.readFileSync(filePath, 'utf-8');
-    return {
-        name: core.getInput('name', { required: true }),
-        file
-    };
-};
-function parse() {
-    return {
-        portainer: parsePortainerConfig(),
-        stack: parseStackConfig()
-    };
-}
-exports.parse = parse;
-
-
-/***/ }),
-
-/***/ 822:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(186));
-const config = __importStar(__nccwpck_require__(88));
-const portainer_1 = __nccwpck_require__(17);
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const cfg = config.parse();
-            core.debug('Parsed Configuration');
-            core.startGroup('Authentication');
-            const portainer = new portainer_1.PortainerClient(cfg.portainer.url);
-            yield portainer.login(cfg.portainer.username, cfg.portainer.password);
-            core.endGroup();
-            core.startGroup('Get State');
-            const stacks = yield portainer.getStacks(cfg.portainer.endpoint);
-            let stack = stacks.find(item => item.name === cfg.stack.name);
-            core.endGroup();
-            if (stack) {
-                core.startGroup('Update existing stack');
-                yield portainer.updateStack({
-                    id: stack.id,
-                    endpoint: cfg.portainer.endpoint,
-                    file: cfg.stack.file
-                });
-                core.endGroup();
-            }
-            else {
-                core.startGroup('Create new stack');
-                yield portainer.createStack({
-                    endpoint: cfg.portainer.endpoint,
-                    name: cfg.stack.name,
-                    file: cfg.stack.file
-                });
-                core.endGroup();
-            }
-        }
-        catch (e) {
-            core.setFailed(e.message);
-        }
-    });
-}
-run();
-
-
-/***/ }),
-
-/***/ 17:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PortainerClient = void 0;
-const axios_1 = __importDefault(__nccwpck_require__(545));
-class PortainerClient {
-    constructor(url) {
-        this.token = null;
-        if (url.pathname !== '/api/') {
-            url.pathname = '/api/';
-        }
-        this.client = axios_1.default.create({
-            baseURL: url.toString()
-        });
-        this.client.interceptors.request.use((config) => {
-            if (this.token) {
-                config.headers['Authorization'] = `Bearer ${this.token}`;
-            }
-            return config;
-        });
-    }
-    login(username, password) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { data } = yield this.client.post('/auth', {
-                username,
-                password
-            });
-            this.token = data.jwt;
-        });
-    }
-    getSwarmId(endpoint) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { data } = yield this.client.get(`/endpoints/${endpoint}/docker/swarm`);
-            return data.id;
-        });
-    }
-    getStacks(endpoint) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const swarmId = yield this.getSwarmId(endpoint);
-            const { data } = yield this.client.get('/stacks', {
-                params: {
-                    filters: JSON.stringify({
-                        SwarmId: swarmId
-                    })
-                }
-            });
-            return data.map((item) => ({
-                id: item.Id,
-                name: item.Name
-            }));
-        });
-    }
-    createStack(payload) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const swarmId = yield this.getSwarmId(payload.endpoint);
-            const { data } = yield this.client.post('/stacks', {
-                name: payload.name,
-                stackFileContent: payload.file,
-                swarmID: swarmId
-            }, {
-                params: {
-                    endpointId: payload.endpoint,
-                    method: 'string',
-                    type: 1
-                }
-            });
-            return {
-                id: data.Id,
-                name: data.Name
-            };
-        });
-    }
-    updateStack(payload) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.client.put(`/stacks/${payload.id}`, {
-                stackFileContent: payload.file
-            }, { params: { endpointId: payload.endpoint } });
-        });
-    }
-}
-exports.PortainerClient = PortainerClient;
-
-
-/***/ }),
-
 /***/ 351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -3454,18 +3220,233 @@ module.exports = require("zlib");
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__nccwpck_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__nccwpck_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(822);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+// ESM COMPAT FLAG
+__nccwpck_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(186);
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __nccwpck_require__(747);
+;// CONCATENATED MODULE: ./src/config.ts
+
+
+const parsePortainerConfig = () => {
+    return {
+        url: new URL(core.getInput('portainer-url', { required: true })),
+        username: core.getInput('portainer-username', { required: true }),
+        password: core.getInput('portainer-password', { required: true }),
+        endpoint: parseInt(core.getInput('portainer-endpoint', { required: true }))
+    };
+};
+const parseStackConfig = () => {
+    const filePath = core.getInput('file', { required: true });
+    const file = external_fs_.readFileSync(filePath, 'utf-8');
+    return {
+        name: core.getInput('name', { required: true }),
+        file
+    };
+};
+function parse() {
+    return {
+        portainer: parsePortainerConfig(),
+        stack: parseStackConfig()
+    };
+}
+
+// EXTERNAL MODULE: ./node_modules/axios/index.js
+var axios = __nccwpck_require__(545);
+var axios_default = /*#__PURE__*/__nccwpck_require__.n(axios);
+;// CONCATENATED MODULE: ./src/portainer.ts
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+class PortainerClient {
+    constructor(url) {
+        this.token = null;
+        if (url.pathname !== '/api/') {
+            url.pathname = '/api/';
+        }
+        this.client = axios_default().create({
+            baseURL: url.toString()
+        });
+        this.client.interceptors.request.use((config) => {
+            if (this.token) {
+                config.headers['Authorization'] = `Bearer ${this.token}`;
+            }
+            return config;
+        });
+    }
+    login(username, password) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { data } = yield this.client.post('/auth', {
+                username,
+                password
+            });
+            this.token = data.jwt;
+        });
+    }
+    getSwarmId(endpoint) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { data } = yield this.client.get(`/endpoints/${endpoint}/docker/swarm`);
+            return data.id;
+        });
+    }
+    getStacks(endpoint) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const swarmId = yield this.getSwarmId(endpoint);
+            const { data } = yield this.client.get('/stacks', {
+                params: {
+                    filters: JSON.stringify({
+                        SwarmId: swarmId
+                    })
+                }
+            });
+            return data.map((item) => ({
+                id: item.Id,
+                name: item.Name
+            }));
+        });
+    }
+    createStack(payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const swarmId = yield this.getSwarmId(payload.endpoint);
+            const { data } = yield this.client.post('/stacks', {
+                name: payload.name,
+                stackFileContent: payload.file,
+                swarmID: swarmId
+            }, {
+                params: {
+                    endpointId: payload.endpoint,
+                    method: 'string',
+                    type: 1
+                }
+            });
+            return {
+                id: data.Id,
+                name: data.Name
+            };
+        });
+    }
+    updateStack(payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.client.put(`/stacks/${payload.id}`, {
+                stackFileContent: payload.file
+            }, { params: { endpointId: payload.endpoint } });
+        });
+    }
+}
+
+;// CONCATENATED MODULE: ./src/index.ts
+var src_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+function run() {
+    return src_awaiter(this, void 0, void 0, function* () {
+        try {
+            const cfg = parse();
+            core.debug('Parsed Configuration');
+            core.startGroup('Authentication');
+            const portainer = new PortainerClient(cfg.portainer.url);
+            yield portainer.login(cfg.portainer.username, cfg.portainer.password);
+            core.endGroup();
+            core.startGroup('Get State');
+            const stacks = yield portainer.getStacks(cfg.portainer.endpoint);
+            let stack = stacks.find(item => item.name === cfg.stack.name);
+            core.endGroup();
+            if (stack) {
+                core.startGroup('Update existing stack');
+                yield portainer.updateStack({
+                    id: stack.id,
+                    endpoint: cfg.portainer.endpoint,
+                    file: cfg.stack.file
+                });
+                core.endGroup();
+            }
+            else {
+                core.startGroup('Create new stack');
+                yield portainer.createStack({
+                    endpoint: cfg.portainer.endpoint,
+                    name: cfg.stack.name,
+                    file: cfg.stack.file
+                });
+                core.endGroup();
+            }
+        }
+        catch (e) {
+            core.setFailed(e.message);
+        }
+    });
+}
+run();
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map

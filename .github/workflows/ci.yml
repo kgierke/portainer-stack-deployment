@@ -16,5 +16,5 @@ jobs:
           portainer-password: ${{ secrets.PORTAINER_PASSWORD }}
           portainer-endpoint: 2
           name: portainer-stack-deploy-test
-          file: teststack.yml
+          file: teststack.yml.mustache
           variables: '{"image":"hello-world"}'

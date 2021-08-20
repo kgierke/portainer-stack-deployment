@@ -4208,12 +4208,7 @@ class PortainerClient {
      */
     deleteStack(payload) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.client.delete(`/stacks/${payload.id}`, {
-                params: {
-                    external: true,
-                    endpointId: payload.endpoint
-                }
-            });
+            yield this.client.delete(`/stacks/${payload.id}`);
         });
     }
 }

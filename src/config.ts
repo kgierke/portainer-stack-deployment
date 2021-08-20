@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as fs from 'fs';
-import * as mustache from 'mustache';
+import mustache from 'mustache';
 
 const parsePortainerConfig = () => {
     return {

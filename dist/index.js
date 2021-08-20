@@ -3272,10 +3272,6 @@ var __webpack_exports__ = {};
 // ESM COMPAT FLAG
 __nccwpck_require__.r(__webpack_exports__);
 
-// NAMESPACE OBJECT: ./node_modules/mustache/mustache.mjs
-var mustache_namespaceObject = {};
-__nccwpck_require__.r(mustache_namespaceObject);
-
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(186);
 // EXTERNAL MODULE: external "fs"
@@ -4044,7 +4040,7 @@ mustache.Scanner = Scanner;
 mustache.Context = Context;
 mustache.Writer = Writer;
 
-/* harmony default export */ const mustache_mustache = ((/* unused pure expression or super */ null && (mustache)));
+/* harmony default export */ const mustache_mustache = (mustache);
 
 ;// CONCATENATED MODULE: ./src/config.ts
 
@@ -4061,7 +4057,7 @@ const parsePortainerConfig = () => {
 const parseStackConfig = () => {
     const filePath = core.getInput('file', { required: true });
     const template = external_fs_.readFileSync(filePath, 'utf-8');
-    const file = mustache_namespaceObject.render(template, core.getInput('variables', { required: false }));
+    const file = mustache_mustache.render(template, core.getInput('variables', { required: false }));
     return {
         name: core.getInput('name', { required: true }),
         file

@@ -5,25 +5,28 @@ import {PortainerClient} from './portainer';
 async function run() {
     try {
         const cfg = config.parse();
-        core.debug('Parsed Configuration');
+        core.debug(`Configuration parsed: ${cfg}`);
 
         core.startGroup('Authentication');
         const portainer = new PortainerClient(cfg.portainer.url);
         await portainer.login(cfg.portainer.username, cfg.portainer.password);
+        core.info("Retrieved authentication token from Portainer");
         core.endGroup();
 
-        core.startGroup('Get State');
+        core.startGroup('Get current state');
         const stacks = await portainer.getStacks(cfg.portainer.endpoint);
         let stack = stacks.find(item => item.name === cfg.stack.name);
         core.endGroup();
 
         if (stack) {
             core.startGroup('Update existing stack');
+            core.info(`Updating existing stack (ID: ${stack.id})`);
             await portainer.updateStack({
                 id: stack.id,
                 endpoint: cfg.portainer.endpoint,
                 file: cfg.stack.file
             })
+            core.info("Stack updated.");
             core.endGroup();
         } else {
             core.startGroup('Create new stack');
@@ -32,10 +35,11 @@ async function run() {
                 name: cfg.stack.name,
                 file: cfg.stack.file
             })
+            core.info("Stack created.");
             core.endGroup();
         }
     } catch (e) {
-        core.setFailed(e.message);
+        core.setFailed(`Action failed with error: ${e}`);
     }
 }
 

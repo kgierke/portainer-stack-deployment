@@ -39,6 +39,12 @@ export class PortainerClient {
         });
     }
 
+    /**
+     * Authenticate against the Portainer API and store the JWT.
+     *
+     * @param username {String} - username to authenticate with.
+     * @param password {String} - password to authenticate with.
+     */
     async login(username: string, password: string) {
         const {data} = await this.client.post('/auth', {
             username,
@@ -48,10 +54,15 @@ export class PortainerClient {
         this.token = data.jwt;
     }
 
+    /**
+     * Retrieve the swarm ID from the Portainer Endpoint.
+     *
+     * @param endpoint {Number} - Portainer endpoint ID.
+     */
     async getSwarmId(endpoint: number) {
         const {data} = await this.client.get(`/endpoints/${endpoint}/docker/swarm`);
 
-        return data.id;
+        return data.ID;
     }
 
     async getStacks(endpoint: number): Promise<[Stack]> {

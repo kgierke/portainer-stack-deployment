@@ -14,7 +14,7 @@ const parsePortainerConfig = () => {
 const parseStackConfig = () => {
     const filePath = core.getInput('file', {required: true});
     const template = fs.readFileSync(filePath, 'utf-8');
-    const file = mustache.render(template, core.getInput('variables', {required: false}));
+    const file = mustache.render(template, JSON.parse(core.getInput('variables', {required: false})));
 
     return {
         name: core.getInput('name', {required: true}),

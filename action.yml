@@ -1,4 +1,4 @@
-name: Portainer Stack Deploy
+name: Portainer Stack Deployment
 description: Github Action for deploying docker swarm stacks through Portainer API.
 inputs:
   portainer-url:

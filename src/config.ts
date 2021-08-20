@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as fs from 'fs';
+import * as mustache from 'mustache';
 
 const parsePortainerConfig = () => {
     return {
@@ -12,7 +13,8 @@ const parsePortainerConfig = () => {
 
 const parseStackConfig = () => {
     const filePath = core.getInput('file', {required: true});
-    const file = fs.readFileSync(filePath, 'utf-8');
+    const template = fs.readFileSync(filePath, 'utf-8');
+    const file = mustache.render(template, core.getInput('variables', {required: false}));
 
     return {
         name: core.getInput('name', {required: true}),

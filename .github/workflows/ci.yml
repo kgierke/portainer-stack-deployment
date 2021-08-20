@@ -17,3 +17,4 @@ jobs:
           portainer-endpoint: 2
           name: portainer-stack-deploy-test
           file: teststack.yml
+          variables: '{"image":"hello-world"}'

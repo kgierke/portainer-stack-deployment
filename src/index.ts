@@ -20,7 +20,7 @@ async function run() {
 
         if (stack) {
             core.startGroup('Update existing stack');
-            core.info(`Updating existing stack (ID: ${stack.id})`);
+            core.info(`Updating existing stack (ID: ${stack.id})...`);
             await portainer.updateStack({
                 id: stack.id,
                 endpoint: cfg.portainer.endpoint,
@@ -30,6 +30,7 @@ async function run() {
             core.endGroup();
         } else {
             core.startGroup('Create new stack');
+            core.info("Creating new stack...");
             await portainer.createStack({
                 endpoint: cfg.portainer.endpoint,
                 name: cfg.stack.name,

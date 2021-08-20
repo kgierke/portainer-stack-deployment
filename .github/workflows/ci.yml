@@ -1,0 +1,19 @@
+name: "Test"
+on: [push]
+
+jobs:
+  test-integration:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v2
+      - name: Test Stack creation
+        uses: ./
+        with:
+          portainer-url: ${{ secrets.PORTAINER_URL }}
+          portainer-username: ${{ secrets.PORTAINER_USERNAME }}
+          portainer-password: ${{ secrets.PORTAINER_PASSWORD }}
+          portainer-endpoint: 2
+          name: portainer-stack-deploy-test
+          file: teststack.yml

@@ -4046,23 +4046,26 @@ mustache.Writer = Writer;
 
 
 
-const parsePortainerConfig = () => {
+function parsePortainerConfig() {
     return {
         url: new URL(core.getInput('portainer-url', { required: true })),
         username: core.getInput('portainer-username', { required: true }),
         password: core.getInput('portainer-password', { required: true }),
         endpoint: parseInt(core.getInput('portainer-endpoint', { required: true }))
     };
-};
-const parseStackConfig = () => {
+}
+function parseStackConfig() {
     const filePath = core.getInput('file', { required: true });
-    const template = external_fs_.readFileSync(filePath, 'utf-8');
-    const file = mustache_mustache.render(template, JSON.parse(core.getInput('variables', { required: false })));
+    let file = external_fs_.readFileSync(filePath, 'utf-8');
+    if (filePath.split('.').pop() === 'mustache') {
+        file = mustache_mustache.render(file, JSON.parse(core.getInput('variables', { required: false })));
+    }
     return {
         name: core.getInput('name', { required: true }),
-        file
+        file,
+        delete: !!core.getInput('delete', { required: false }).length
     };
-};
+}
 function parse() {
     return {
         portainer: parsePortainerConfig(),
@@ -4090,9 +4093,15 @@ class PortainerClient {
         if (url.pathname !== '/api/') {
             url.pathname = '/api/';
         }
+        /**
+         * Create axios instance for requests.
+         */
         this.client = axios_default().create({
             baseURL: url.toString()
         });
+        /**
+         * Create Axios Interceptor for Authorization header if token is set.
+         */
         this.client.interceptors.request.use((config) => {
             if (this.token) {
                 config.headers['Authorization'] = `Bearer ${this.token}`;
@@ -4126,6 +4135,11 @@ class PortainerClient {
             return data.ID;
         });
     }
+    /**
+     * Retrieve all existing stacks from swarm.
+     *
+     * @param endpoint {Number} - Portainer endpoint ID.
+     */
     getStacks(endpoint) {
         return __awaiter(this, void 0, void 0, function* () {
             const swarmId = yield this.getSwarmId(endpoint);
@@ -4142,6 +4156,11 @@ class PortainerClient {
             }));
         });
     }
+    /**
+     * Create new stack and return name and id of it.
+     *
+     * @param payload {CreateStackPayload} - Payload for the stack to be created.
+     */
     createStack(payload) {
         return __awaiter(this, void 0, void 0, function* () {
             const swarmId = yield this.getSwarmId(payload.endpoint);
@@ -4162,11 +4181,34 @@ class PortainerClient {
             };
         });
     }
+    /**
+     * Update existing stack with given data.
+     *
+     * @param payload {UpdateStackPayload} - Payload for the stack to be updated.
+     */
     updateStack(payload) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.client.put(`/stacks/${payload.id}`, {
+            const { data } = yield this.client.put(`/stacks/${payload.id}`, {
                 stackFileContent: payload.file
-            }, { params: { endpointId: payload.endpoint } });
+            }, {
+                params: {
+                    endpointId: payload.endpoint
+                }
+            });
+            return {
+                id: data.Id,
+                name: data.Name
+            };
+        });
+    }
+    /**
+     * Delete a stack by the given ID.
+     *
+     * @param stackId {Number} - ID of the stack to be deleted.
+     */
+    deleteStack(stackId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.client.delete(`/stacks/${stackId}`);
         });
     }
 }
@@ -4199,15 +4241,24 @@ function run() {
             let stack = stacks.find(item => item.name === cfg.stack.name);
             core.endGroup();
             if (stack) {
-                core.startGroup('Update existing stack');
-                core.info(`Updating existing stack (ID: ${stack.id})...`);
-                yield portainer.updateStack({
-                    id: stack.id,
-                    endpoint: cfg.portainer.endpoint,
-                    file: cfg.stack.file
-                });
-                core.info("Stack updated.");
-                core.endGroup();
+                if (cfg.stack.delete) {
+                    core.startGroup('Delete existing stack');
+                    core.info(`Delete existing stack (ID: ${stack.id})...`);
+                    yield portainer.deleteStack(stack.id);
+                    core.info("Stack deleted.");
+                    core.endGroup();
+                }
+                else {
+                    core.startGroup('Update existing stack');
+                    core.info(`Updating existing stack (ID: ${stack.id})...`);
+                    yield portainer.updateStack({
+                        id: stack.id,
+                        endpoint: cfg.portainer.endpoint,
+                        file: cfg.stack.file
+                    });
+                    core.info("Stack updated.");
+                    core.endGroup();
+                }
             }
             else {
                 core.startGroup('Create new stack');

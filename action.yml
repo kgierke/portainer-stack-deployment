@@ -23,6 +23,10 @@ inputs:
     description: Variables to render the stack file (JSON Format).
     required: false
     default: "{}"
+  delete:
+    description: Option to delete a stack.
+    required: false
+    default: ""
 runs:
   using: node12
   main: dist/index.js

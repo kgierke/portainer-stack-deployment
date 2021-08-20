@@ -18,3 +18,14 @@ jobs:
           name: portainer-stack-deploy-test
           file: teststack.yml.mustache
           variables: '{"image":"hello-world"}'
+      - name: Test Stack deletion
+        uses: ./
+        with:
+          portainer-url: ${{ secrets.PORTAINER_URL }}
+          portainer-username: ${{ secrets.PORTAINER_USERNAME }}
+          portainer-password: ${{ secrets.PORTAINER_PASSWORD }}
+          portainer-endpoint: 2
+          name: portainer-stack-deploy-test
+          file: teststack.yml.mustache
+          variables: '{"image":"hello-world"}'
+          delete: true

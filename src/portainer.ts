@@ -1,35 +1,25 @@
 import axios, {AxiosInstance, AxiosRequestConfig} from 'axios';
-
-export interface Stack {
-    id: number
-    name: string
-}
-
-export interface CreateStackPayload {
-    name: string
-    endpoint: number
-    file: string
-}
-
-export interface UpdateStackPayload {
-    id: number
-    endpoint: number
-    file: string
-}
+import {CreateStackPayload, PortainerStack, Stack, UpdateStackPayload} from "./types";
 
 export class PortainerClient {
-    private readonly client: AxiosInstance;
     token = null;
+    private readonly client: AxiosInstance;
 
     constructor(url: URL) {
         if (url.pathname !== '/api/') {
             url.pathname = '/api/';
         }
 
+        /**
+         * Create axios instance for requests.
+         */
         this.client = axios.create({
             baseURL: url.toString()
         });
 
+        /**
+         * Create Axios Interceptor for Authorization header if token is set.
+         */
         this.client.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
             if (this.token) {
                 config.headers['Authorization'] = `Bearer ${this.token}`;
@@ -59,41 +49,56 @@ export class PortainerClient {
      *
      * @param endpoint {Number} - Portainer endpoint ID.
      */
-    async getSwarmId(endpoint: number) {
+    async getSwarmId(endpoint: number): Promise<number> {
         const {data} = await this.client.get(`/endpoints/${endpoint}/docker/swarm`);
 
         return data.ID;
     }
 
-    async getStacks(endpoint: number): Promise<[Stack]> {
+    /**
+     * Retrieve all existing stacks from swarm.
+     *
+     * @param endpoint {Number} - Portainer endpoint ID.
+     */
+    async getStacks(endpoint: number): Promise<Stack[]> {
         const swarmId = await this.getSwarmId(endpoint);
-        const {data} = await this.client.get('/stacks', {
-            params: {
-                filters: JSON.stringify({
-                    SwarmId: swarmId
-                })
-            }
-        });
+        const {data}: { data: PortainerStack[] } = await this.client.get(
+            '/stacks',
+            {
+                params: {
+                    filters: JSON.stringify({
+                        SwarmId: swarmId
+                    })
+                }
+            });
 
-        return data.map((item: any) => ({
+        return data.map((item) => ({
             id: item.Id,
             name: item.Name
         }));
     }
 
-    async createStack(payload: CreateStackPayload) {
+    /**
+     * Create new stack and return name and id of it.
+     *
+     * @param payload {CreateStackPayload} - Payload for the stack to be created.
+     */
+    async createStack(payload: CreateStackPayload): Promise<Stack> {
         const swarmId = await this.getSwarmId(payload.endpoint);
-        const {data} = await this.client.post('/stacks', {
-            name: payload.name,
-            stackFileContent: payload.file,
-            swarmID: swarmId
-        }, {
-            params: {
-                endpointId: payload.endpoint,
-                method: 'string',
-                type: 1
-            }
-        });
+        const {data}: { data: PortainerStack } = await this.client.post(
+            '/stacks',
+            {
+                name: payload.name,
+                stackFileContent: payload.file,
+                swarmID: swarmId
+            },
+            {
+                params: {
+                    endpointId: payload.endpoint,
+                    method: 'string',
+                    type: 1
+                }
+            });
 
         return {
             id: data.Id,
@@ -101,9 +106,37 @@ export class PortainerClient {
         };
     }
 
-    async updateStack(payload: UpdateStackPayload) {
-        await this.client.put(`/stacks/${payload.id}`, {
-            stackFileContent: payload.file
-        }, {params: {endpointId: payload.endpoint}})
+    /**
+     * Update existing stack with given data.
+     *
+     * @param payload {UpdateStackPayload} - Payload for the stack to be updated.
+     */
+    async updateStack(payload: UpdateStackPayload): Promise<Stack> {
+        const {data}: { data: PortainerStack } = await this.client.put(
+            `/stacks/${payload.id}`,
+            {
+                stackFileContent: payload.file
+            },
+            {
+                params: {
+                    endpointId: payload.endpoint
+                }
+            });
+
+        return {
+            id: data.Id,
+            name: data.Name
+        };
+    }
+
+    /**
+     * Delete a stack by the given ID.
+     *
+     * @param stackId {Number} - ID of the stack to be deleted.
+     */
+    async deleteStack(stackId: number): Promise<void> {
+        await this.client.delete(
+            `/stacks/${stackId}`
+        );
     }
 }

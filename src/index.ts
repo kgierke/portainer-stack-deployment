@@ -19,15 +19,23 @@ async function run() {
         core.endGroup();
 
         if (stack) {
-            core.startGroup('Update existing stack');
-            core.info(`Updating existing stack (ID: ${stack.id})...`);
-            await portainer.updateStack({
-                id: stack.id,
-                endpoint: cfg.portainer.endpoint,
-                file: cfg.stack.file
-            })
-            core.info("Stack updated.");
-            core.endGroup();
+            if (cfg.stack.delete) {
+                core.startGroup('Delete existing stack');
+                core.info(`Delete existing stack (ID: ${stack.id})...`);
+                await portainer.deleteStack(stack.id);
+                core.info("Stack deleted.");
+                core.endGroup();
+            } else {
+                core.startGroup('Update existing stack');
+                core.info(`Updating existing stack (ID: ${stack.id})...`);
+                await portainer.updateStack({
+                    id: stack.id,
+                    endpoint: cfg.portainer.endpoint,
+                    file: cfg.stack.file
+                })
+                core.info("Stack updated.");
+                core.endGroup();
+            }
         } else {
             core.startGroup('Create new stack');
             core.info("Creating new stack...");

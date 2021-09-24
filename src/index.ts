@@ -30,7 +30,7 @@ async function run() {
                 core.endGroup();
             } else {
                 core.startGroup('Update existing stack');
-                core.info(`Updating existing stack (ID: ${stack.id})...`);
+                core.info(`Updating existing stack (ID: ${stack.id}; prune: ${cfg.stack.prune})...`);
                 await portainer.updateStack({
                     id: stack.id,
                     endpoint: cfg.portainer.endpoint,

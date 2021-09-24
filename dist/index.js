@@ -4064,7 +4064,8 @@ function parseStackConfig() {
     return {
         name: core.getInput('name', { required: true }),
         file,
-        delete: !!core.getInput('delete', { required: false }).length
+        delete: !!core.getInput('delete', { required: false }).length,
+        prune: !!core.getInput('prune', { required: false }).length
     };
 }
 function parse() {
@@ -4190,7 +4191,8 @@ class PortainerClient {
     updateStack(payload) {
         return __awaiter(this, void 0, void 0, function* () {
             const { data } = yield this.client.put(`/stacks/${payload.id}`, {
-                stackFileContent: payload.file
+                stackFileContent: payload.file,
+                prune: payload.prune
             }, {
                 params: {
                     endpointId: payload.endpoint
@@ -4259,11 +4261,12 @@ function run() {
                 }
                 else {
                     core.startGroup('Update existing stack');
-                    core.info(`Updating existing stack (ID: ${stack.id})...`);
+                    core.info(`Updating existing stack (ID: ${stack.id}; prune: ${cfg.stack.prune})...`);
                     yield portainer.updateStack({
                         id: stack.id,
                         endpoint: cfg.portainer.endpoint,
-                        file: cfg.stack.file
+                        file: cfg.stack.file,
+                        prune: cfg.stack.prune,
                     });
                     core.info("Stack updated.");
                     core.endGroup();

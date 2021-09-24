@@ -17,6 +17,7 @@ export interface StackConfig {
     name: string
     file: string
     delete: boolean
+    prune: boolean
 }
 
 export interface Stack {
@@ -34,6 +35,7 @@ export interface UpdateStackPayload {
     id: number
     endpoint: number
     file: string
+    prune: boolean
 }
 
 export interface DeleteStackPayload {

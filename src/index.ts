@@ -34,7 +34,8 @@ async function run() {
                 await portainer.updateStack({
                     id: stack.id,
                     endpoint: cfg.portainer.endpoint,
-                    file: cfg.stack.file
+                    file: cfg.stack.file,
+                    prune: cfg.stack.prune,
                 })
                 core.info("Stack updated.");
                 core.endGroup();

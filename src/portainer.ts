@@ -115,7 +115,8 @@ export class PortainerClient {
         const {data}: { data: PortainerStack } = await this.client.put(
             `/stacks/${payload.id}`,
             {
-                stackFileContent: payload.file
+                stackFileContent: payload.file,
+                prune: payload.prune
             },
             {
                 params: {

@@ -27,6 +27,10 @@ inputs:
     description: Option to delete a stack.
     required: false
     default: ""
+  prune:
+    description: Remove missing/obsolete services from stack on update.
+    required: false
+    default: ""
 runs:
   using: node12
   main: dist/index.js

@@ -39,3 +39,4 @@ The following inputs are available:
 | `file`               | String | Yes      | Path to the stack file. Can be either `.yml` or `.mustache`.                                  |
 | `variables`          | String | No       | Variables to use when `file` is a `.mustache` template. Variables need to be written as JSON. |
 | `delete`             | String | No       | If set to `true` the stack will be deleted (based on the name).                               |
+| `prune `             | String | No       | If set to `true` missing/obsolete services will be removed from the exiting stack on update.  |
